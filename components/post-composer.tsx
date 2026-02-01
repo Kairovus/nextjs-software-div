@@ -22,7 +22,7 @@ export default function PostComposer() {
   };
 
   return (
-    <div className="border-b border-slate-700 p-4">
+    <div className="border-b border-slate-700 p-4 px-20 w-full">
       <div className="flex gap-4">
         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
           U

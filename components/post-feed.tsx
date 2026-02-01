@@ -4,7 +4,7 @@ import { Heart, MessageCircle, Share, MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 
-interface Post {
+export interface Post {
   id: string;
   content: string;
   username: string;
