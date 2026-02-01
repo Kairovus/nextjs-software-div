@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Heart, Search, Home, Bell, Mail, Bookmark, User, MoreHorizontal } from "lucide-react";
+import { Heart, Search, Home as HomeIcon, Bell, Mail, Bookmark, User, MoreHorizontal } from "lucide-react";
 import { PrismaClient } from "@prisma/client";
 import PostFeed from "@/components/post-feed";
 import PostComposer from "@/components/post-composer";
@@ -43,7 +43,7 @@ export default async function Home() {
   const posts = await getPosts();
 
   const navItems = [
-    { icon: <Home size={20} />, label: "Home", href: "/" },
+    { icon: <HomeIcon size={20} />, label: "Home", href: "/" },
     { icon: <Search size={20} />, label: "Explore", href: "#" },
     { icon: <Bell size={20} />, label: "Notifications", href: "#" },
     { icon: <Mail size={20} />, label: "Messages", href: "#" },
