@@ -1,46 +1,10 @@
 import Link from "next/link";
 import { Heart, Search, Home as HomeIcon, Bell, Mail, Bookmark, User, MoreHorizontal } from "lucide-react";
-import { PrismaClient } from "@prisma/client";
 import PostFeed from "@/components/post-feed";
 import PostComposer from "@/components/post-composer";
 
-const prisma = new PrismaClient();
-
-async function getPosts() {
-  try {
-    const posts = await prisma.post.findMany({
-      include: {
-        author: {
-          include: {
-            profile: true,
-          },
-        },
-        likes: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      take: 20,
-    });
-
-    return posts.map((post) => ({
-      id: post.id,
-      content: post.content,
-      username: post.author.username,
-      email: post.author.email,
-      avatarUrl: post.author.profile?.avatarUrl || "https://via.placeholder.com/48",
-      likeCount: post.likes.length,
-      createdAt: post.createdAt,
-      authorId: post.authorId,
-    }));
-  } catch (error) {
-    console.error("Failed to fetch posts:", error);
-    return [];
-  }
-}
-
-export default async function Home() {
-  const posts = await getPosts();
+export default function HomePage() {
+  const posts = [];
 
   const navItems = [
     { icon: <HomeIcon size={20} />, label: "Home", href: "/" },
