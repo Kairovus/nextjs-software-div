@@ -1,47 +1,46 @@
-'use client';
-
 import Link from "next/link";
-import { Heart, MessageCircle, Share, Search, Home, Bell, Mail, Bookmark, User, MoreHorizontal } from "lucide-react";
-import { useState } from "react";
+import { Heart, Search, Home, Bell, Mail, Bookmark, User, MoreHorizontal } from "lucide-react";
+import { PrismaClient } from "@prisma/client";
+import PostFeed from "@/components/post-feed";
+import PostComposer from "@/components/post-composer";
 
-export default function Home() {
-  const [liked, setLiked] = useState<{ [key: number]: boolean }>({});
+const prisma = new PrismaClient();
 
-  const posts = [
-    {
-      id: 1,
-      author: "Alex Dev",
-      handle: "@alexdev",
-      avatar: "👨‍💻",
-      content: "Just launched my new project! Check it out and let me know what you think.",
-      timestamp: "2h ago",
-      likes: 234,
-      replies: 45,
-      retweets: 89,
-    },
-    {
-      id: 2,
-      author: "Sarah Code",
-      handle: "@sarahcode",
-      avatar: "👩‍💻",
-      content: "React 19 is amazing. The new features are game-changers for performance.",
-      timestamp: "4h ago",
-      likes: 567,
-      replies: 123,
-      retweets: 234,
-    },
-    {
-      id: 3,
-      author: "Dev Tips",
-      handle: "@devtips",
-      avatar: "💡",
-      content: "Pro tip: Use semantic HTML for better accessibility and SEO rankings.",
-      timestamp: "6h ago",
-      likes: 890,
-      replies: 156,
-      retweets: 445,
-    },
-  ];
+async function getPosts() {
+  try {
+    const posts = await prisma.post.findMany({
+      include: {
+        author: {
+          include: {
+            profile: true,
+          },
+        },
+        likes: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 20,
+    });
+
+    return posts.map((post) => ({
+      id: post.id,
+      content: post.content,
+      username: post.author.username,
+      email: post.author.email,
+      avatarUrl: post.author.profile?.avatarUrl || "https://via.placeholder.com/48",
+      likeCount: post.likes.length,
+      createdAt: post.createdAt,
+      authorId: post.authorId,
+    }));
+  } catch (error) {
+    console.error("Failed to fetch posts:", error);
+    return [];
+  }
+}
+
+export default async function Home() {
+  const posts = await getPosts();
 
   const navItems = [
     { icon: <Home size={20} />, label: "Home", href: "/" },
@@ -110,73 +109,8 @@ export default function Home() {
             <h2 className="text-xl font-bold">Home</h2>
           </header>
 
-          {/* Post Composer */}
-          <div className="border-b border-slate-700 p-4">
-            <div className="flex gap-4">
-              <div className="text-2xl">👤</div>
-              <div className="flex-1">
-                <textarea
-                  className="w-full bg-transparent text-2xl text-white placeholder-slate-600 resize-none outline-none"
-                  placeholder="What's happening?!"
-                  rows={3}
-                />
-                <div className="flex justify-end mt-4">
-                  <button className="bg-blue-500 text-white font-bold px-8 py-2 rounded-full hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                    Post
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Feed */}
-          <div>
-            {posts.map((post) => (
-              <article
-                key={post.id}
-                className="border-b border-slate-700 p-4 hover:bg-slate-900/40 transition-colors cursor-pointer"
-              >
-                <div className="flex gap-4">
-                  <div className="text-3xl">{post.avatar}</div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="font-bold hover:underline">{post.author}</span>
-                        <span className="text-slate-500 ml-2">{post.handle}</span>
-                        <span className="text-slate-500 ml-2">·</span>
-                        <span className="text-slate-500 ml-2">{post.timestamp}</span>
-                      </div>
-                      <MoreHorizontal size={16} className="text-slate-500" />
-                    </div>
-                    <p className="mt-2 text-base text-white">{post.content}</p>
-                    <div className="mt-3 flex text-slate-500 gap-8 text-sm">
-                      <div className="flex items-center gap-2 hover:text-blue-400 group">
-                        <div className="p-2 group-hover:bg-blue-400/10 rounded-full">
-                          <MessageCircle size={16} />
-                        </div>
-                        {post.replies}
-                      </div>
-                      <div className="flex items-center gap-2 hover:text-green-400 group">
-                        <div className="p-2 group-hover:bg-green-400/10 rounded-full">
-                          <Share size={16} />
-                        </div>
-                        {post.retweets}
-                      </div>
-                      <div
-                        className="flex items-center gap-2 hover:text-red-400 group"
-                        onClick={() => setLiked((prev) => ({ ...prev, [post.id]: !prev[post.id] }))}
-                      >
-                        <div className="p-2 group-hover:bg-red-400/10 rounded-full">
-                          <Heart size={16} fill={liked[post.id] ? "currentColor" : "none"} />
-                        </div>
-                        {post.likes + (liked[post.id] ? 1 : 0)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
+          <PostComposer />
+          <PostFeed posts={posts} />
         </main>
 
         {/* Right Sidebar */}
