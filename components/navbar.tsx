@@ -1,10 +1,11 @@
 'use client';
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Home as HomeIcon, Search, Bell, Mail, User } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Home as HomeIcon, Search, Bell, Mail, User, LogOut } from "lucide-react";
 
 export default function Navbar() {
+  const router = useRouter();
   const pathname = usePathname();
   if (pathname === "/login" || pathname === "/register") return null;
 
@@ -23,8 +24,13 @@ export default function Navbar() {
     { label: "User", href: "/actions/user" },
   ];
 
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    router.push("/login"); 
+  };
+
   return (
-    <aside className="w-64 border-r border-slate-700 p-4 sticky top-0 h-screen">
+    <aside className="w-64 border-r border-slate-700 p-4 sticky top-0 h-screen flex flex-col">
       {/* Logo */}
       <div className="text-2xl font-bold mb-8 text-blue-400">𝕏</div>
 
@@ -61,6 +67,17 @@ export default function Navbar() {
             </Link>
           ))}
         </div>
+      </div>
+
+      {/* Logout Button */}
+      <div className="mt-auto">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-4 text-xl hover:bg-slate-900 p-3 rounded-full transition-colors w-full text-left"
+        >
+          <LogOut size={20} />
+          <span>Log out</span>
+        </button>
       </div>
     </aside>
   );
