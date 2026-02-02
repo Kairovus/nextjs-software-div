@@ -2,18 +2,44 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Mail, Lock } from "lucide-react";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     setIsLoading(true);
-    // Handle login logic here
-    setTimeout(() => setIsLoading(false), 1000);
+
+    try {
+      const res = await fetch('/actions/user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'signin', email, password }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data?.error || 'Sign in failed');
+        setIsLoading(false);
+        return;
+      }
+
+      // Save user session
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      // on success, navigate to a content page
+      router.push('/explore');
+    } catch (err) {
+      setError('Network error');
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -61,6 +87,9 @@ export default function LoginPage() {
                 />
               </div>
             </div>
+
+            {/* Error */}
+            {error && <p className="text-red-500 text-sm">{error}</p>}
 
             {/* Submit Button */}
             <button

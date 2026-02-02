@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Mail, Lock, User as UserIcon } from "lucide-react";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -29,8 +31,30 @@ export default function RegisterPage() {
     }
 
     setIsLoading(true);
-    // Handle registration logic here
-    setTimeout(() => setIsLoading(false), 1000);
+
+    try {
+      const res = await fetch('/actions/user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'register', username: formData.name, email: formData.email, password: formData.password }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data?.error || 'Registration failed');
+        setIsLoading(false);
+        return;
+      }
+
+      // Save user session
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      // on success, navigate to a content page
+      router.push('/home');
+    } catch (err) {
+      setError('Network error');
+      setIsLoading(false);
+    }
   };
 
   return (

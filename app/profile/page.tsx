@@ -49,23 +49,11 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white border-r border-slate-700">
       <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-64 border-r border-slate-700 p-4 sticky top-0 h-screen hidden lg:block">
-          <div className="text-2xl font-bold mb-8 text-blue-400">𝕏</div>
-          <nav className="space-y-6">
-            <Link
-              href="/"
-              className="flex items-center gap-4 text-xl hover:bg-slate-900 p-3 rounded-full transition-colors"
-            >
-              ← Back
-            </Link>
-          </nav>
-        </aside>
 
         {/* Main Content */}
-        <main className="flex-1 max-w-2xl border-r border-slate-700">
+        <main className="flex-1 max-w-2xl">
           {/* Header */}
           <header className="sticky top-0 z-50 bg-black/80 backdrop-blur border-b border-slate-700 p-4 flex items-center gap-4">
             <Link href="/" className="hover:bg-slate-900 p-2 rounded-full transition-colors">
@@ -92,11 +80,10 @@ export default function ProfilePage() {
                 <div className="text-7xl">{profileData.avatar}</div>
                 <button
                   onClick={() => setIsFollowing(!isFollowing)}
-                  className={`px-6 py-2 rounded-full font-bold transition-colors ${
-                    isFollowing
+                  className={`px-6 py-2 rounded-full font-bold transition-colors ${isFollowing
                       ? "bg-slate-900 text-white border border-slate-700 hover:bg-slate-800"
                       : "bg-blue-500 text-white hover:bg-blue-600"
-                  }`}
+                    }`}
                 >
                   {isFollowing ? "Following" : "Follow"}
                 </button>
@@ -144,11 +131,10 @@ export default function ProfilePage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 py-4 font-bold transition-colors border-b-2 ${
-                    activeTab === tab.id
+                  className={`flex-1 py-4 font-bold transition-colors border-b-2 ${activeTab === tab.id
                       ? "border-blue-500 text-white"
                       : "border-transparent text-slate-500 hover:text-white"
-                  }`}
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -197,21 +183,6 @@ export default function ProfilePage() {
           </div>
         </main>
 
-        {/* Right Sidebar */}
-        <aside className="w-80 p-4 hidden lg:block border-l border-slate-700">
-          <div className="bg-slate-900 rounded-2xl p-4">
-            <h2 className="text-xl font-bold mb-4">What's happening?!</h2>
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="hover:bg-slate-800 p-3 rounded cursor-pointer transition-colors">
-                  <div className="text-sm text-slate-500">Trending</div>
-                  <div className="font-bold text-base">#Developer</div>
-                  <div className="text-sm text-slate-500">500K Posts</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </aside>
       </div>
     </div>
   );

@@ -1,21 +1,46 @@
 'use client';
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function PostComposer() {
+  const router = useRouter();
   const [content, setContent] = useState("");
   const [isPosting, setIsPosting] = useState(false);
 
   const handlePost = async () => {
     if (!content.trim()) return;
 
+    const userStr = localStorage.getItem('user');
+    if (!userStr) {
+      alert("Please sign in to post");
+      return;
+    }
+
+    const user = JSON.parse(userStr);
+
     setIsPosting(true);
     try {
-      // Call your post action here
-      console.log("[v0] Posting:", content);
+      const res = await fetch('/actions/post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          content,
+          authorId: user.id
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to create post');
+      }
+
+      console.log("Post created successfully");
       setContent("");
+      router.refresh();
     } catch (error) {
       console.error("Failed to post:", error);
+      alert("Failed to create post. Please try again.");
     } finally {
       setIsPosting(false);
     }

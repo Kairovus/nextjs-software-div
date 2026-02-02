@@ -1,9 +1,15 @@
+'use client';
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Home as HomeIcon, Search, Bell, Mail, User } from "lucide-react";
 
 export default function Navbar() {
+  const pathname = usePathname();
+  if (pathname === "/login" || pathname === "/register") return null;
+
   const navItems = [
-    { icon: <HomeIcon size={20} />, label: "Home", href: "/" },
+    { icon: <HomeIcon size={20} />, label: "Home", href: "/home" },
     { icon: <Search size={20} />, label: "Explore", href: "/explore" },
     { icon: <Bell size={20} />, label: "Notifications", href: "/notifications" },
     { icon: <Mail size={20} />, label: "Messages", href: "/messages" },
