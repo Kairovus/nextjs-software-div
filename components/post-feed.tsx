@@ -1,8 +1,9 @@
 'use client';
 
-import { Heart, MessageCircle, Share, MoreHorizontal } from "lucide-react";
-import { useState } from "react";
+import { Heart, MessageCircle, Share, MoreHorizontal, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
+import { useRouter } from "next/navigation";
 
 export interface Post {
   id: string;
@@ -20,7 +21,17 @@ interface PostFeedProps {
 }
 
 export default function PostFeed({ posts }: PostFeedProps) {
+  const router = useRouter();
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+
+  useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      setCurrentUser(JSON.parse(userStr));
+    }
+  }, []);
 
   const toggleLike = (postId: string) => {
     setLikedPosts((prev) => {
@@ -32,6 +43,36 @@ export default function PostFeed({ posts }: PostFeedProps) {
       }
       return newSet;
     });
+  };
+
+  const handleDelete = async (postId: string) => {
+    if (!currentUser || isDeleting) return;
+
+    if (!confirm("Are you sure you want to delete this post?")) return;
+
+    setIsDeleting(postId);
+    try {
+      const res = await fetch('/actions/post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          postId,
+          userId: currentUser.id
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to delete post');
+      }
+
+      router.refresh();
+    } catch (error) {
+      console.error("Failed to delete post:", error);
+      alert("Failed to delete post");
+    } finally {
+      setIsDeleting(null);
+    }
   };
 
   if (posts.length === 0) {
@@ -51,7 +92,7 @@ export default function PostFeed({ posts }: PostFeedProps) {
         >
           <div className="flex gap-4">
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
-              {post.username.charAt(0).toUpperCase()}
+              {(post.username && post.username[0]) ? post.username[0].toUpperCase() : '?'}
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between">
@@ -63,7 +104,21 @@ export default function PostFeed({ posts }: PostFeedProps) {
                     {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
                   </span>
                 </div>
-                <MoreHorizontal size={16} className="text-slate-500" />
+                <div className="flex items-center gap-2">
+                  {currentUser && currentUser.id === post.authorId && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(post.id);
+                      }}
+                      disabled={isDeleting === post.id}
+                      className="text-slate-500 hover:text-red-500 transition-colors disabled:opacity-50"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                  <MoreHorizontal size={16} className="text-slate-500" />
+                </div>
               </div>
               <p className="mt-2 text-base text-white">{post.content}</p>
               <div className="mt-3 flex text-slate-500 gap-8 text-sm">
@@ -81,7 +136,10 @@ export default function PostFeed({ posts }: PostFeedProps) {
                 </div>
                 <div
                   className="flex items-center gap-2 hover:text-red-400 group"
-                  onClick={() => toggleLike(post.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleLike(post.id);
+                  }}
                 >
                   <div className="p-2 group-hover:bg-red-400/10 rounded-full">
                     <Heart
