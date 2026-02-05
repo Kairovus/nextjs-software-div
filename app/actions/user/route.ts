@@ -17,6 +17,7 @@ export async function POST(req: Request) {
                 data: { username, email, password },
             });
 
+            // create an empty profile
             await prisma.profile.create({
                 data: { userId: user.id, bio: `Hi, I'm ${user.username}`, avatarUrl: null },
             }).catch(() => null);

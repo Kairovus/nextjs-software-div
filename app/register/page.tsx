@@ -46,7 +46,6 @@ export default function RegisterPage() {
         return;
       }
 
-      // Save user session
       localStorage.setItem('user', JSON.stringify(data.user));
 
       // on success, navigate to a content page
